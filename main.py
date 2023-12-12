@@ -157,3 +157,33 @@ def filter_for_crosswalks(df_work25th, cms_work):
 
 def filter_by_hcpcs(df, hcpcs_code):
     return df.filter(F.col('hcpcs') == hcpcs_code)
+
+def apply_filter(df, conditions):
+  for col, op, val in conditions:
+    if op == "==":
+      df = df.filter(F.col(col) == val)
+    elif op == ">":
+      df = df.filter(F.col(col) > val)
+    elif op == "<":
+      df = df.filter(F.col(col) < val)
+    elif op == ">=":
+      df = df.filter(F.col(col) >= val)
+    elif op == "isin":
+      df = df.filter(F.col(col).isin(*val))
+    elif op == "not":
+      df = df.filter(~F.col(col) != val)
+    elif op == "not_in":
+      df = df.filter(~F.col(col).isin(*val))
+  return df
+### Helper Function to Group and Order
+def create_order(df: F.DataFrame, group_columns: list, sum_column: str, sort_conditions: list):
+  grouped_df = df.groupBy(group_columns).agg(F.sum(sum_column).alias("sum_" +sum_column))
+  sort_exprs = [F.col(col).asc() if ascending else F.col(col).desc()
+                for col, ascending in sort_conditions]
+  ordered_df = grouped_df.orderBy(sort_exprs)
+  return ordered_df
+### Helper Function for Dollar Amounts Formatting
+def format_currency(amount):
+     return "${:,.2f}".format(amount)    
+### Select all from ELDB at service level
+df = spark.sql('select * from eldb.rt_eldb_pt_abd_2017_2023_service_level_100pct')
