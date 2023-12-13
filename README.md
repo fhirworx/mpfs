@@ -1,2 +1,2 @@
 # mpfs
-Ratesetting modeling using CCW
+Ratesetting modeling using CCW; helpers for rule info
